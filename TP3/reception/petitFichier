@@ -1,0 +1,30 @@
+Lien de téléchargement du projet : https://we.tl/t-WfxsL9Z9VT
+
+Lien du git : https://github.com/GarciaPena-Loris/ProjetProgS4-ETPL
+
+char* cheminFichier = malloc(tailleNomFichier + 25);
+  cheminFichier[0] = '\0';
+
+  struct stat attribus;
+  char numClientStr[1000];
+  sprintf(numClientStr, "%d", numeroClient);
+
+  strcat(cheminFichier,"../reception/client");
+  strcat(cheminFichier, numClientStr);
+
+  printf("Chemin vers le fichier : '%s'\n", cheminFichier);
+
+  if (stat(cheminFichier, &attribus) == -1) {
+      mkdir(cheminFichier, 0700);
+  }
+
+  strcat(cheminFichier,"/");
+  strcat(cheminFichier, nomFichier);
+
+  FILE* fichier = fopen(cheminFichier, "wb");
+  if(fichier == NULL){
+    perror("fopen : ERROR : erreur ouverture fichier ");
+    exit(1);  
+  }
+
+#include <sys/stat.h>
