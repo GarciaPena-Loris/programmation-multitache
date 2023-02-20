@@ -266,7 +266,7 @@ void traitementFTP(int socketClient) {
   printf("  --Recois taille nom fichier--\n");
   int tailleNomFichier;
 
-  ssize_t resRecvsizeName = recvTCP(socketClient, &tailleNomFichier, sizeof(tailleMessage));
+  ssize_t resRecvsizeName = recvTCP(socketClient, &tailleNomFichier, sizeof(tailleNomFichier));
   if (resRecvsizeName == 0 || resRecvsizeName == -1) {
     printf("\tArret de la reception.\n");
     exit(1);
@@ -309,7 +309,7 @@ void traitementFTP(int socketClient) {
 
   // --- Etape 4 : Recuperation de la taille du fichier
   int tailleFichier;
-  ssize_t resRcvTCPSize = recvTCP(socketClient, &tailleFichier, sizeof(tailleMessage));
+  ssize_t resRcvTCPSize = recvTCP(socketClient, &tailleFichier, sizeof(tailleFichier));
   if (resRcvTCPSize == 0 || resRcvTCPSize == -1) {
     printf("\tArret de la reception.\n");
     exit(1);
@@ -679,6 +679,7 @@ int main(int argc, char *argv[]) {
 
   // -- Etape 2 : Nommage la socket seveur
   nommerSocket(socketServeur, numeroPort);
+
 
   // -- Etape intermediaire : affichage de l'ip
   afficherIPMachine();

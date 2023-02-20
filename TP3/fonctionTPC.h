@@ -43,22 +43,35 @@ void closeSocket(int socket) {
 }
 
 void nommerSocket(int socketServeur, char* port) {
-    struct sockaddr_in adresseClient;
-    adresseClient.sin_family = AF_INET;
-    adresseClient.sin_addr.s_addr = INADDR_ANY;
+    if (atoi(port) < 1024) {
+        printf("nommerSocket : ERROR : le port est inférrieur à 1024.");
+        exit(1);
+    } 
+    
+    struct sockaddr_in adresseServeur;
+    adresseServeur.sin_family = AF_INET;
+    adresseServeur.sin_addr.s_addr = INADDR_ANY;
 
-    if(atoi(port) == -1) {
+    if (atoi(port) == -1) {
         perror("nommerSocket : ERROR : le port est invalide ");
         exit(1);
     }
-    adresseClient.sin_port = htons(atoi(port));
+    adresseServeur.sin_port = htons(atoi(port));
 
-    if (bind(socketServeur, (struct sockaddr*) &adresseClient, sizeof(adresseClient)) == -1) {
+    if (bind(socketServeur, (struct sockaddr*) &adresseServeur, sizeof(adresseServeur)) == -1) {
         perror("nommerSocket : ERROR : probleme le nommage de la socket ");
         exit(1);
     }
 
     printf("nommerSocket : Socket serveur nommée avec succès.\n");
+    
+    // -- Afficher ip et port du serveur
+    socklen_t tailleAdresse = sizeof(adresseServeur);
+    if (getsockname(socketServeur, (struct sockaddr*) &adresseServeur, &tailleAdresse) == -1) {
+        perror("nommerSocket : ERROR : probleme lors de la récupération de l'ip ");
+        exit(1);
+    } 
+    printf("nommerSocket : Serveur est nommé sur l'ip %s et le port %i.\n", inet_ntoa(adresseServeur.sin_addr), ntohs(adresseServeur.sin_port));
 }
 
 void ecouterDemande(int socketServeur, char* port) {

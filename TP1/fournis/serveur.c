@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
    ss.sin_addr.s_addr = INADDR_ANY;
    ss.sin_port = htons(atoi(argv[1]));
 
+
    int res = bind(ds, (struct sockaddr*)&ss, sizeof(ss));
 
    if (res == -1){
@@ -77,15 +78,32 @@ int main(int argc, char *argv[]) {
       }
       freeifaddrs(ifap);
 
+
+
   /* Etape 4 : recevoir un message du client (voir sujet pour plus de détails)*/
    printf("-----Recevoir message------\n");
    printf("En attente de message...\n");
 
    struct sockaddr_in sockExpediteur ;
    socklen_t lgAdr = sizeof(struct sockaddr_in);
-   char messageRecu[300];
+   char messageRecu[10];
 
    ssize_t resRecv = recvfrom(ds, &messageRecu, sizeof(messageRecu), 0, (struct sockaddr *) &sockExpediteur, &lgAdr);
+   if (resRecv == -1) {
+      perror("Client : pb avec le recvFrom :");
+      exit(1); // je choisis ici d'arrêter le programme
+   }
+   printf("Message reçus : %s\n", messageRecu);
+
+   //affichage des informations de l'expéditeur :
+   printf("Ip de l'expéditeur : %s\n", inet_ntoa(sockExpediteur.sin_addr));
+   printf("Port de l'expéditeur : %hu\n", htons(sockExpediteur.sin_port));
+
+
+   printf("En attente de message...\n");
+
+
+   ssize_t resRecv2 = recvfrom(ds, &messageRecu, sizeof(messageRecu), 0, (struct sockaddr *) &sockExpediteur, &lgAdr);
    if (resRecv == -1) {
       perror("Client : pb avec le recvFrom :");
       exit(1); // je choisis ici d'arrêter le programme
