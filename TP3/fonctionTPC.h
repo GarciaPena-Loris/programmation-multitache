@@ -66,12 +66,14 @@ void nommerSocket(int socketServeur, char* port) {
     printf("nommerSocket : Socket serveur nommée avec succès.\n");
     
     // -- Afficher ip et port du serveur
+    /* Ne sert à rien avec INADDR_ANY car la socket est disponible pour écouter les connexions sur toutes les interfaces réseau disponible.
     socklen_t tailleAdresse = sizeof(adresseServeur);
     if (getsockname(socketServeur, (struct sockaddr*) &adresseServeur, &tailleAdresse) == -1) {
         perror("nommerSocket : ERROR : probleme lors de la récupération de l'ip ");
         exit(1);
     } 
     printf("nommerSocket : Serveur est nommé sur l'ip %s et le port %i.\n", inet_ntoa(adresseServeur.sin_addr), ntohs(adresseServeur.sin_port));
+    */
 }
 
 void ecouterDemande(int socketServeur, char* port) {
