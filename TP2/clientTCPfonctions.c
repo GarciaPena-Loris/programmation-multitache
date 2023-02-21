@@ -80,13 +80,14 @@ void traitementBoucle(int socketClient, int nbAppel) {
   int nbAppelSend = 0;
 
   // --- Etape 1 : Ecriture du message
-  printf("Veuillez saisir le message à envoyer au serveur (30000 caractère max) : \n");
+  printf("Envoi d'un talbeau de 100000 octets : \n");
 
-  char messageClient[30000];
-  fgets(messageClient, sizeof(messageClient), stdin);
-  messageClient[strlen(messageClient) - 1] = '\0';
+    char messageClient[300000];
+   for (int i=0; i<300000; i++) {
+      messageClient[i] = 'a';
+   }
 
-  printf("Message rentré : '%s'\n", messageClient);
+  //printf("Message rentré : '%s'\n", messageClient);
   printf("Taille Message : %ld\n", strlen(messageClient));
 
   nbTotalOctetsSuppose = (strlen(messageClient) + 1) * nbAppel;
@@ -123,7 +124,7 @@ void traitementBoucle(int socketClient, int nbAppel) {
       break;
     }
 
-    printf("\tMessage envoyé : '%s'\n", messageClient);
+    //printf("\tMessage envoyé : '%s'\n", messageClient);
     printf("\tNombre d'octets envoyés : %zd\n", resSendTCP);
 
     printf("-----Fin envoie message------\n\n");

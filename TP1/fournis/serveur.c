@@ -82,11 +82,12 @@ int main(int argc, char *argv[]) {
 
   /* Etape 4 : recevoir un message du client (voir sujet pour plus de détails)*/
    printf("-----Recevoir message------\n");
+
    printf("En attente de message...\n");
 
    struct sockaddr_in sockExpediteur ;
    socklen_t lgAdr = sizeof(struct sockaddr_in);
-   char messageRecu[10];
+   char messageRecu[100];
 
    ssize_t resRecv = recvfrom(ds, &messageRecu, sizeof(messageRecu), 0, (struct sockaddr *) &sockExpediteur, &lgAdr);
    if (resRecv == -1) {

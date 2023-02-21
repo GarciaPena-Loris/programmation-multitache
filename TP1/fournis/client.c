@@ -88,6 +88,14 @@ int main(int argc, char *argv[]) {
       exit(1); // je choisis ici d'arrêter le programme
    }
    printf("Nombre d'octets envoyés : %d\n", resSend);
+
+   int resSend2 = sendto(ds, &messageClient, strlen(messageClient)+1, 0, (struct sockaddr *) &sockServ, sizeAdr) ;
+   //int resSend = sendto(ds, &messageClient, sizeof(messageClient), 0, (struct sockaddr *) &sockServ, sizeAdr) ;
+   if (resSend == -1) {
+      perror("Client : pb avec le send to :");
+      exit(1); // je choisis ici d'arrêter le programme
+   }
+   printf("Nombre d'octets envoyés : %d\n", resSend);
    printf("-----Recevoir message------\n");
    // il sera primordial de controler les valeurs de retour de toutes les fonctions utilisées.
 

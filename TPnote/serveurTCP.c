@@ -4,8 +4,8 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <stdlib.h>
-#include<arpa/inet.h>
-#include<string.h>
+#include <arpa/inet.h>
+#include <string.h>
 #include <stdio.h>
 
 #include "fonctionTPC.h"
@@ -323,7 +323,7 @@ void traitementFTP(int socketClient) {
 
   // --- Etape 5 : Recuperation du fichier partie par partie
   printf("  --Reception du message partie par partie--\n");
-  int nbOctetTotalEcrit = 0;
+  long unsigned int nbOctetTotalEcrit = 0;
   int nbPartie = 1;
   while (nbOctetTotalEcrit < tailleFichier) {
     // --- Etape 6 : Recuperation de la partie
@@ -337,7 +337,7 @@ void traitementFTP(int socketClient) {
     nbTotalOctetRecu += resRcvpartie;
     nbAppelRcv++;
 
-    printf("\tReception n°%d, nombre d'octets recus : %ld\n",nbPartie, resRcvpartie);
+    printf("\tReception n°%d, nombre d'octets recus : %ld, nombre d'octets ecrits : %zd\n",nbPartie, resRcvpartie, nbOctetTotalEcrit);
 
     // --- Etape 7 : Ecriture de la partie dans le fichier
     size_t nombreOctetsEcrit = 0;
@@ -463,7 +463,7 @@ void traitementFTPNumerote(int socketClient, int numeroClient) {
     nbTotalOctetRecu += resRcvpartie;
     nbAppelRcv++;
 
-    printf("\tReception n°%lu du client n°%d, nombre d'octets recus : %ld\n",nbPartie, numeroClient, resRcvpartie);
+    printf("\tReception n°%lu du client n°%d, nombre d'octets recus : %ld, nombre d'octets ecrit : %zd\n",nbPartie, numeroClient, resRcvpartie, nbOctetTotalEcrit);
 
     // --- Etape 7 : Ecriture de la partie dans le fichier
     size_t nombreOctetsEcrit = 0;
@@ -645,7 +645,7 @@ void traitementFTPNumeroteInverse(int socketClient, int numeroClient) {
       break;
     }
     
-    printf("\tEnvoi n°%lu du client n°%d, nombre d'octets envoyés : %zd\n", nbPartie, numeroClient, resSendTCP);
+    printf("\tEnvoi n°%lu du client n°%d, nombre d'octets envoyés : %zd, nombre d'octets lu : %zd\n", nbPartie, numeroClient, resSendTCP, nbOctetTotalLu);
     nbTotalOctetEnvoyes += resSendTCP;
     nbAppelSent++;
     nbPartie++;

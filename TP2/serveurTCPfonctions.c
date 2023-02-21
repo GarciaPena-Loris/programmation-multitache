@@ -122,14 +122,14 @@ void traitementBoucle(int socketClient) {
     // --- Etape 3 : Reception du message
     printf("  --Recevoir le message de taille %d--\n", tailleMessage);
 
-    char messageRecu[30000];
+    char messageRecu[300000];
     ssize_t resRecvTCP = recvTCP(socketClient, messageRecu, tailleMessage);
     if (resRecvTCP == 0 || resRecvTCP == -1) {
       printf("\tArret de la boucle.\n");
       break;
     }
 
-    printf("\tMessage recus : '%s'\n", messageRecu);
+    //printf("\tMessage recus : '%s'\n", messageRecu);
     printf("\tNombre d'octet recus : '%ld'\n\n", resRecvTCP);
 
     // --- Etape 4 : Affichage nombre appel et nombre Octet
