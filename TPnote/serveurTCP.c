@@ -356,7 +356,7 @@ void traitementFTP(int socketClient) {
 
   printf("\n--------\n");
   printf("Nombre d'octets recu par le recv : %d\n", nbTotalOctetRecu);
-  printf("Nombre d'octets ecrit dans le fichier : %d\n", nbOctetTotalEcrit);
+  printf("Nombre d'octets ecrit dans le fichier : %zd\n", nbOctetTotalEcrit);
   printf("Nombre d'appel à recv : %d\n", nbAppelRcv);
   printf("--------\n");
 
