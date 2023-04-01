@@ -1,0 +1,41 @@
+Valeur acutelle main: 0
+Debut du thread d'id 0, numero 139783053506112, proc. 57171
+Debut du cacul de 1s...
+Fin du thread d'id 0
+Valeur acutelle main: 1
+Debut du thread d'id 1, numero 139783045113408, proc. 57171
+Debut du cacul de 1s...
+Fin du thread d'id 1
+Valeur acutelle main: 2
+Debut du thread d'id 2, numero 139783036720704, proc. 57171
+Debut du cacul de 1s...
+Fin du thread d'id 2
+Valeur acutelle main: 3
+Debut du thread d'id 3, numero 139783028328000, proc. 57171
+Debut du cacul de 1s...
+Fin du thread d'id 3
+Valeur acutelle main: 4
+Debut du thread d'id 4, numero 139783019935296, proc. 57171
+Debut du cacul de 1s...
+Fin du thread d'id 4
+Valeur acutelle main: 5
+Debut du thread d'id 5, numero 139783011542592, proc. 57171
+Debut du cacul de 1s...
+Fin du thread d'id 5
+Valeur acutelle main: 6
+Debut du thread d'id 6, numero 139782931871296, proc. 57171
+Debut du cacul de 1s...
+Fin du thread d'id 6
+Valeur acutelle main: 7
+Debut du thread d'id 7, numero 139782923478592, proc. 57171
+Debut du cacul de 1s...
+Fin du thread d'id 7
+Valeur acutelle main: 8
+Debut du thread d'id 8, numero 139782915085888, proc. 57171
+Debut du cacul de 1s...
+Fin du thread d'id 8
+Valeur acutelle main: 9
+Debut du thread d'id 9, numero 139782906693184, proc. 57171
+Debut du cacul de 1s...
+Fin du thread d'id 9
+saisir un caractere 

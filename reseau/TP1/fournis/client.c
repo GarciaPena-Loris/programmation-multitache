@@ -17,8 +17,8 @@ int main(int argc, char *argv[]) {
       paramètres sont à adapter en fonction des besoins. Sans ces
       paramètres, l'exécution doit être arrétée, autrement, elle
       aboutira à des erreurs.*/
-   if (argc != 4){
-      printf("utilisation : %s ip_serveur port_serveur port_client\n", argv[0]);
+   if (argc != 3){
+      printf("utilisation : %s ip_serveur port_serveur\n", argv[0]);
       exit(1);
    }
 
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 
    printf("Veuillez saisir le message à envoyer au serveur (100 caractère max) : ");
 
-   char messageClient[100];
+   char messageClient[15];
    scanf("%s", messageClient);
 
    /*
@@ -88,16 +88,6 @@ int main(int argc, char *argv[]) {
       exit(1); // je choisis ici d'arrêter le programme
    }
    printf("Nombre d'octets envoyés : %d\n", resSend);
-
-   int resSend2 = sendto(ds, &messageClient, strlen(messageClient)+1, 0, (struct sockaddr *) &sockServ, sizeAdr) ;
-   //int resSend = sendto(ds, &messageClient, sizeof(messageClient), 0, (struct sockaddr *) &sockServ, sizeAdr) ;
-   if (resSend == -1) {
-      perror("Client : pb avec le send to :");
-      exit(1); // je choisis ici d'arrêter le programme
-   }
-   printf("Nombre d'octets envoyés : %d\n", resSend);
-   printf("-----Recevoir message------\n");
-   // il sera primordial de controler les valeurs de retour de toutes les fonctions utilisées.
 
 /* Etape 5 : recevoir un message du serveur (voir sujet pour plus de détails)*/
    struct sockaddr_in sockExpediteur ;

@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
 
    struct sockaddr_in sockExpediteur ;
    socklen_t lgAdr = sizeof(struct sockaddr_in);
-   char messageRecu[100];
+   char messageRecu[5];
 
    ssize_t resRecv = recvfrom(ds, &messageRecu, sizeof(messageRecu), 0, (struct sockaddr *) &sockExpediteur, &lgAdr);
    if (resRecv == -1) {
@@ -95,6 +95,7 @@ int main(int argc, char *argv[]) {
       exit(1); // je choisis ici d'arrêter le programme
    }
    printf("Message reçus : %s\n", messageRecu);
+   printf("Nombre d'octets reçus : %zd\n", resRecv);
 
    //affichage des informations de l'expéditeur :
    printf("Ip de l'expéditeur : %s\n", inet_ntoa(sockExpediteur.sin_addr));
@@ -103,17 +104,6 @@ int main(int argc, char *argv[]) {
 
    printf("En attente de message...\n");
 
-
-   ssize_t resRecv2 = recvfrom(ds, &messageRecu, sizeof(messageRecu), 0, (struct sockaddr *) &sockExpediteur, &lgAdr);
-   if (resRecv == -1) {
-      perror("Client : pb avec le recvFrom :");
-      exit(1); // je choisis ici d'arrêter le programme
-   }
-   printf("Message reçus : %s\n", messageRecu);
-
-   //affichage des informations de l'expéditeur :
-   printf("Ip de l'expéditeur : %s\n", inet_ntoa(sockExpediteur.sin_addr));
-   printf("Port de l'expéditeur : %hu\n", htons(sockExpediteur.sin_port));
 
   /* Etape 5 : envoyer un message au serveur (voir sujet pour plus de détails)*/
    printf("-----Envoyer message------\n");
