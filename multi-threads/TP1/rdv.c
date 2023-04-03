@@ -38,7 +38,7 @@ void * participant (void * p){
   // RdV 
   printf("[Thread d°%d] 🍼 : Je suis né 🥺.\n", idThread);
   //calcul
-  printf("[Thread d°%d] 🤖 : Je commence mon PREMIER calcul en cours pendant %d sec ⏱️.\n", idThread ,temps);
+  printf("[Thread d°%d] 🤖 : Je commence mon PREMIER calcul en cours pendant %d sec ⏱️.\n", idThread ,(temps * 3));
   calcul(temps);
   printf("[Thread d°%d] 🤯 : J'ai finis mon PREMIER calcul, je demande un verrou 🔐.\n", idThread);
 
@@ -61,12 +61,10 @@ void * participant (void * p){
     pthread_cond_broadcast(predicat->condRDV);
   }
   else {
-    while (predicat->compteur < nbThread) {
       // bloque l’appelant et rend le verrou de facon atomique
       printf("[Thread d°%d] 💤 : Tout le monde n'a pas finis... Je me met en attente 😴.\n", idThread);
       pthread_cond_wait(predicat->condRDV, predicat->verrou);
       printf("[Thread d°%d] 🥱 : Je me réveille.\n", idThread);
-    }
   }
 
   // tous les threads sont arrivés, on peut débloquer le RdV
