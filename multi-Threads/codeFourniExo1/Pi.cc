@@ -41,7 +41,9 @@ int main(int argc, char **argv) {
     }
     printf("Clé créée avec succés.\n");
 
-    // File de message
+
+
+    // Recuperer File de message
     int fileId = msgget(key, IPC_CREAT|0666);
     if (fileId == -1) {
         perror("Erreur lors de l'accès à la file de message ");
@@ -49,49 +51,43 @@ int main(int argc, char **argv) {
     }
     printf("ID de la file de message : %i\n", fileId);
 
-    // Tant que l'utilisateur veut envoyer des messages, il peut les saisir.
-    while (1) {
-        printf("Entrez un message svp : ");
-        char message[MAX_MSG_SIZE];
-        fgets(message, MAX_MSG_SIZE, stdin);
-        message[strlen(message) - 1] = '\0';
-
-        // Envois demande d'accès à la variable de messages
-        printf("Envois de la demande d'accés a la ressource.\n");
-        struct demandeAcces demande;
-        demande.mtype = 1;
-        demande.nproc = pid;
-        ssize_t res = msgsnd(fileId, &demande, sizeof(demande.nproc), 0);
-        if (res == -1) {
-            perror("Erreur lors de la demande d'accès de la variable partagée ");
-            exit(EXIT_FAILURE);
-        }
-        printf("Demande de la ressource envoyé avec succés.\n");
-
-        // Réception de la variable partagée
-        sMsg data;
-        res = msgrcv(fileId, &data, sizeof(data.message), pid, 0);
-        if (res == -1) {
-            perror("Erreur lors de la réception de la variable partagée ");
-            exit(EXIT_FAILURE);
-        }
-        printf("Variable partagée recu avec succés : '%s'\n", data.message);
-
-        // Ajoute le message dans la variable partagée
-        strcpy(data.message, message);
-        data.mtype = 2;
-
-        // Renvois la variable
-        printf("Envois du message '%s' via la variable partagée.\n", message);
-        res = msgsnd(fileId, (const void *)&data, strlen(data.message), 0);
-        if (res == -1) {
-            perror("Erreur lors de la modification de la variable partagée ");
-            exit(EXIT_FAILURE);
-        }
-        printf("Variable partagée envoyé avec succés.!\n");
-
-
+    // Envois demande d'accès à la variable de messages
+    printf("Envois de la demande d'accés a la ressource.\n");
+    struct demandeAcces demande;
+    demande.mtype = 1;
+    demande.nproc = pid;
+    ssize_t res = msgsnd(fileId, &demande, sizeof(demande.nproc), 0);
+    if (res == -1) {
+        perror("Erreur lors de la demande d'accès de la variable partagée ");
+        exit(EXIT_FAILURE);
     }
+    printf("Demande de la ressource envoyé avec succés.\n");
+
+    // Réception de la variable partagée
+    sMsg data;
+    res = msgrcv(fileId, &data, sizeof(data.message), pid, 0);
+    if (res == -1) {
+        perror("Erreur lors de la réception de la variable partagée ");
+        exit(EXIT_FAILURE);
+    }
+    printf("Variable partagée recu avec succés : '%s'\n", data.message);
+
+    // Ajoute le message dans la variable partagée
+    printf("Signalez la libération de la ressource : ");
+    char message[MAX_MSG_SIZE];
+    fgets(message, MAX_MSG_SIZE, stdin);
+    strcpy(data.message, message);
+    data.mtype = 2;
+
+    // Renvois de la confirmation de libération
+    printf("Envois du message '%s' via la variable partagée.\n", message);
+    res = msgsnd(fileId, (const void *)&data, strlen(data.message), 0);
+    if (res == -1) {
+        perror("Erreur lors de la modification de la variable partagée ");
+        exit(EXIT_FAILURE);
+    }
+    printf("Confirmation envoyé avec succés.!\n");
+
     
     printf("Fin de l'application.\n");
     return 0;

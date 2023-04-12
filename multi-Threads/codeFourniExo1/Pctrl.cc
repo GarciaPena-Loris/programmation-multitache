@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     }
     printf("Clé créée avec succés.\n");
 
-    // File de message
+    // Créer file de message
     int fileId = msgget(key, IPC_CREAT|0666);
     if (fileId == -1) {
         perror("Erreur lors de la création ou l'accès de la file de message ");
@@ -47,31 +47,31 @@ int main(int argc, char **argv) {
     while (1) {
         // Attente d'une demande d'accès
         printf("Attente de demande d'accés...\n");
-        demandeAcces processusRequest;
-        ssize_t res = msgrcv(fileId, &processusRequest, sizeof(processusRequest.nproc), 1, 0);
+        demandeAcces demandeAcces;
+        ssize_t res = msgrcv(fileId, &demandeAcces, sizeof(demandeAcces.nproc), 1, 0);
         if (res == -1) {
             perror("Erreur lors de la demande d'accès à la variable partagée ");
             // Destruction de la file et au revoir.
             if (msgctl(fileId, IPC_RMID, NULL) == -1) {
-                perror("Erreur fatale lors de l'exécution du processus ");
+                perror("Erreur lors de l'exécution du processus ");
             }
             exit(-1);
         }
+        printf("Accès donné au processus %i\n", demandeAcces.nproc);
 
-        printf("Accès donné au processus %i\n", processusRequest.nproc);
 
         // Envoie de la donnée au processus
         struct sMsg dataSent;
-        dataSent.mtype = processusRequest.nproc;
+        dataSent.mtype = demandeAcces.nproc;
 
-        strcpy(dataSent.message, "patate");
+        strcpy(dataSent.message, "Ma ressource");
 
-        printf("Envois de la ressource partagée au processus %i\n", processusRequest.nproc);
+        printf("Envois de la ressource partagée au processus %i\n", demandeAcces.nproc);
         res = msgsnd(fileId, &dataSent, sizeof(dataSent.message), 0);
         if (res == -1) {
             perror("Erreur lors de l'envoie du message dans la file de messages ");
             if (msgctl(fileId, IPC_RMID, NULL) == -1) {
-                perror("Erreur fatale lors de l'exécution du processus ");
+                perror("Erreur lors de l'exécution du processus ");
             }
             exit(-1);;
         }
@@ -79,20 +79,20 @@ int main(int argc, char **argv) {
 
         // Attente de la réception de la « finition » de la consultation ou modification du message.
         sMsg dataReceived;
-        printf("Attente du message du processus %i ...\n", processusRequest.nproc);
+        printf("Attente de la validation processus %i ...\n", demandeAcces.nproc);
         res = msgrcv(fileId, &dataReceived, sizeof(dataReceived.message), 2, 0);
         if (res == -1) {
             perror("Erreur lors de la récupération de la variable partagée ");
             // Destruction de la file et au revoir.
             if (msgctl(fileId, IPC_RMID, NULL) == -1) {
-                perror("Erreur fatale lors de l'exécution du processus ");
+                perror("Erreur lors de l'exécution du processus ");
             }
             exit(-1);
         }
 
         // Copie dans la variable locale de message
-        printf("Message recu par le processus %i : '%s'\n", processusRequest.nproc, dataReceived.message);
-        printf("Fin du l'échange avec le processus %i\n", processusRequest.nproc);
+        printf("Message recu par le processus %i : '%s'\n", demandeAcces.nproc, dataReceived.message);
+        printf("Fin du l'échange avec le processus %i\n", demandeAcces.nproc);
     }
 
     printf("Fin de l'application.\n");
