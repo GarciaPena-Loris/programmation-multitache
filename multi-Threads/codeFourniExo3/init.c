@@ -6,30 +6,37 @@
 #include <sys/shm.h>
 #include <stdlib.h>
 /*
- création et initialisation d'un tableau de sémaphores pour le
- traitement synchronisé. Le nombre d'éléments correspond au nombre de
- traitements -1 et les valeurs initiales sont à 0 (à la case i, la
- valeur corerspond à la dernière zone traitée par le processus
+ crÃ©ation et initialisation d'un tableau de sÃ©maphores pour le
+ traitement synchronisÃ©. Le nombre d'Ã©lÃ©ments correspond au nombre de
+ traitements -1 et les valeurs initiales sont Ã© 0 (Ã© la case i, la
+ valeur corerspond Ã© la derniÃ©re zone traitÃ©e par le processus
  P_(i+1))
 
- création d'un segment de memoire partagé qui sera un tableau d'entier (un élélement correspondra à une zone)
+ crÃ©ation d'un segment de memoire partagÃ© qui sera un tableau d'entier (un Ã©lÃ©lement correspondra Ã© une zone)
  */
+
+typedef union Semaphores {
+  int val;
+  struct semid_ds *buf;
+  ushort *array;
+} Semaphores;
 
 int main(int argc, char * argv[]){
   
   if (argc!=5) {
     printf("Nbre d'args invalide, utilisation :\n");
-    printf("%s nombre-traitements nombre-zones fichier-pour-cle-ipc entier-pour-clé-ipc\n", argv[0]);
+    printf("%s nombre-traitements nombre-zones fichier-pour-cle-ipc entier-pour-clÃ©-ipc\n", argv[0]);
     exit(0);
   }
 	  
   int cle = ftok(argv[3], atoi(argv[4]));
 
   int nbSem = atoi(argv[1]) -1;
+  int nbZone = atoi(argv[2]);
 
-  int idSem=semget(cle, nbSem, IPC_CREAT | IPC_EXCL | 0600);
+  int idSem = semget(cle, nbSem, IPC_CREAT | IPC_EXCL | 0600);
   
-  if(idSem == -1){
+  if(idSem == -1) {
     perror("erreur semget : ");
     exit(-1);
   }
@@ -38,17 +45,13 @@ int main(int argc, char * argv[]){
 
 
   
-  // initialisation des sémaphores à 0
+  // initialisation des sÃ©maphores Ã  0
  
   ushort tabinit[nbSem];
   for (int i = 0; i < nbSem; i++) tabinit[i] = 0;
  
 
-  union semun{
-    int val;
-    struct semid_ds * buf;
-    ushort * array;
-  } valinit;
+  Semaphores valinit;
   
   valinit.array = tabinit;
 
@@ -57,7 +60,7 @@ int main(int argc, char * argv[]){
     exit(1);
   }
 
-  /* test affichage des valeurs des sémaphores du tableau */
+  /* test affichage des valeurs des sÃ©maphores du tableau */
   valinit.array = (ushort*)malloc(nbSem * sizeof(ushort));
 
   if (semctl(idSem, nbSem, GETALL, valinit) == -1){
@@ -75,19 +78,19 @@ int main(int argc, char * argv[]){
 
 
 
-  // création et initialisation du segment de mémoire partagé :
+  // crÃ©ation et initialisation du segment de mÃ©moire partagÃ© :
 
-  // on réutilise la même clé puisque la numérotation des IPC dépend du type d'objet.
-  int laMem = shmget(cle, atoi(argv[2])*sizeof(int), IPC_CREAT | IPC_EXCL | 0600);
- if (laMem == -1){
+  // on rÃ©utilise la mÃªme clÃ© puisque la numÃ©rotation des IPC dÃ©pend du type d'objet.
+  int laMem = shmget(cle, nbZone * sizeof(int), IPC_CREAT | IPC_EXCL | 0600);
+  if (laMem == -1){
     perror("erreur shmget : ");
     exit(-1);
   }
 
-  printf("creation segment de mémoire ok. mem id : %d \n", laMem);
+  printf("Creation segment de mÃ©moire ok avec memoire id : %d \n", laMem);
  
 	  
-  //attachement au segment pour pouvoir y accéder
+  // attachement au segment pour pouvoir y accÃ©der
   int * p_att = (int *)shmat(laMem, NULL, 0);
   if (p_att== (int *)-1){
     perror("erreur shmat : ");
@@ -95,13 +98,11 @@ int main(int argc, char * argv[]){
   }
 
   // j'ai un pointeur sur le segment, j'initialise le tableau 
-	 
-  for(int i=0; i < atoi(argv[2]); i++){
+  for(int i=0; i < nbZone; i++){
     p_att[i] = 0;
   }
 
-  // détachement pour signaler au système la fin de l'utilisation du segment
-
+  // dÃ©tachement pour signaler au systÃ©me la fin de l'utilisation du segment
   if (shmdt(p_att) == -1){
     perror("erreur shmdt : ");
     exit(-1);

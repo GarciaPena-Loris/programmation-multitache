@@ -25,9 +25,16 @@ void rdv(int nProc, int idSem, int nbRdv) {
         printf("\033[%im [%i] Calcul terminé, mise à jour du point de rendez-vous ✅ \033[0m \n", nProc + 31, nProc);
         
         // On retire 1 du tableau de sémaphores car ce processus est arrivé au RDV
-        struct sembuf op[] = {  { i, -1, 0 },
-                                { i, 0, 0 } };
-        if (semop(idSem, op, 1) == -1)
+        struct sembuf sops[2];
+        sops[0].sem_num = i;        /* Agir sur le sémaphore i */
+        sops[0].sem_op = -1;        /* Décrémenter la valeur de 1 */
+        sops[0].sem_flg = 0;
+
+        sops[1].sem_num = i;        /* Agir sur le sémaphore i */
+        sops[1].sem_op = 0;         /* Attendre que la valeur soit 0 */
+        sops[1].sem_flg = 0;
+
+        if (semop(idSem, &sops[0], 1) == -1)
             exit(1);
 
         // Récupération de la valeur de la sémaphore actuelle pour affichage
@@ -61,7 +68,7 @@ void rdv(int nProc, int idSem, int nbRdv) {
 
         // Tant que la sémaphore actuelle n'est pas à 0, on attend.
         // Synchroniser les processus pour qu'ils attendent tous que les autres aient terminé avant de passer à l'étape suivante
-        if (semop(idSem, op + 1, 1) == -1) {
+        if (semop(idSem, &sops[1], 1) == -1) {
             exit(1);
         }
     }
@@ -134,6 +141,7 @@ int main(int argc, char * argv[]){
     while (wait(NULL) > 0);
     printf("Fin du rendez-vous !\n"); 
 
+    // Supprimer proprement
     free(semaphores.array);
     if (semctl(idSem, 0, IPC_RMID) == -1) {
         perror("Erreur lors de la fin du processus ");
