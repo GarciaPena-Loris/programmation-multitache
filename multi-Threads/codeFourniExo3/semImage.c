@@ -12,6 +12,30 @@ typedef union Semaphores {
     ushort *array;
 } Semaphores;
 
+int semValue;
+
+void afficheTableauSem(int idSem, int nbSem, int numProc) {
+    Semaphores semaphores;
+    semaphores.array = (ushort*)malloc(nbSem* sizeof(ushort)); 
+    if (semctl(idSem, nbSem, GETALL, semaphores) == -1) {
+        perror("Erreur d'initialisation des sémaphores ");
+        exit(1);
+    }
+    printf("\033[%im [%i] Tableau de sémaphores :\033[0m [ ", numProc + 32, numProc+1); 
+    for(int i = 0; i < nbSem - 1; i++) {
+        printf("%d, ", semaphores.array[i]);
+    } 
+    printf("%d ] \n", semaphores.array[nbSem - 1]);
+}
+
+void afficheTableauPartage(int nbZone, int numProc, int * tabMem) {
+    printf("\033[%im [%i] Tableau partagee :\033[0m [ ", numProc + 32, numProc+1); 
+    for(int i = 0; i < nbZone - 1; i++) {
+        printf("%d, ", tabMem[i]);
+    } 
+    printf("%d ] \n", tabMem[nbZone - 1]);
+}
+
 void traitementImage(int numProc, int nbZone, int idSem, int nbSem, int * tabMem) {
     // Initialisation du random du wait
     srand(getpid()); 
@@ -26,146 +50,63 @@ void traitementImage(int numProc, int nbZone, int idSem, int nbSem, int * tabMem
         printf("\033[%im [%i] Je suis le dernier processus 🍼 \033[0m \n\n", numProc + 32, numProc+1); 
     }
 
-    for (int i = 0; i < nbZone; i++) {
-        struct sembuf sops[3];
-        sops[0].sem_num = numProc;
-        sops[0].sem_op = (i+1);           
+    for (int i = 0; i < nbZone; i++) { // [0, 0, 0] --> 4 sem
+        struct sembuf sops[2];
+        sops[0].sem_num = numProc-1; // attente (P) -> Regarde le sem d'avant, si il peut faire -1 il le fait sinon il se met en attente
+        sops[0].sem_op = -1;
         sops[0].sem_flg = 0;
 
-        sops[1].sem_num = numProc;   
-        sops[1].sem_op = -(i+1);         
+        sops[1].sem_num = numProc; // incremente (V) -> Regarde le sem actuel, il fait +1 quoiqu'il arrive
+        sops[1].sem_op = 1;
         sops[1].sem_flg = 0;
 
-        sops[2].sem_num = numProc-1;   
-        sops[2].sem_op = 0;         
-        sops[2].sem_flg = 0;
         
-        if (numProc == 0) { // Je suis le premier processus
-            printf("\n\033[%im [%i] Début de traitement de la zone %d 🖼️ \033[0m \n", numProc + 32, numProc+1, i+1);
-            // Modifie 
+        printf("\n\033[%im [%i] Début de traitement de la zone %d 🖼️ \033[0m \n", numProc + 32, numProc+1, i+1);
+        if (numProc == 0) { // Premier processus
+            printf("\033[%im [%i] J'attend personne pour modifier 🥇 \033[0m \n", numProc + 32, numProc+1);
+        }
+        else {
+            printf("\033[%im [%i] J'attends que ce soit mon tour 😴 \033[0m \n", numProc + 32, numProc+1);
             if (semop(idSem, &sops[0], 1) == -1) {
                 perror(" probleme de semop ");
                 exit(1);
-            }
-
-            // Récupération de la valeur de la sémaphore actuelle pour affichage
-            int semValue = semctl(idSem, numProc, GETVAL);
-            if (semValue == -1) {
-                perror(" probleme de semctl ");
-                exit(1);
-            }
-                
-            printf("\033[%im [%i] J'ai mis à jour le planning de zones, valeur actuelle de la sémaphore : %i \033[0m \n", numProc + 32, numProc+1, semValue);
-
-            // Traitement d'un temps aléatoire
-            int wait = (rand() % 6) + 1;
-            printf("\033[%im [%i] Je modifie la zone %d, ça va me prendre %d secondes ⏱️ \033[0m \n", numProc + 32, numProc+1, i+1, wait);
-            sleep(wait);
-
-            // Modifie la zone partagee
-            tabMem[i] += wait;
-
-            printf("\033[%im [%i] Traitement terminé, mise à jour du planning de zones ✅\033[0m \n", numProc + 32, numProc+1);
-
-            if (semop(idSem, &sops[1], 1) == -1) {
-                perror(" probleme de semop ");
-                exit(1);
-            }
-
-            // Récupération de la valeur de la sémaphore actuelle pour affichage
-            semValue = semctl(idSem, numProc, GETVAL, 0);
-            if (semValue == -1) {
-                perror(" probleme de semctl ");
-                exit(1);
-            }
-                
-            printf("\033[%im [%i] J'ai mis à jour le planning de zones, valeur actuelle de la sémaphore : %i \033[0m \n", numProc + 32, numProc+1, semValue);
-
-            if (i == nbZone - 1) {
-                printf("\033[%im [%i] J'ai finis de mettre a jour toutes les zones 🏆\033[0m \n", numProc + 32, numProc+1);
             }
         }
 
-        else if (numProc != nbSem) { // Processus autre que le premier et le dernier
-            printf("\033[%im [%i] Début de traitement de la zone %d 🖼️ \033[0m \n", numProc + 32, numProc+1, i+1);
+        // Traitement d'un temps aléatoire
+        int wait = (rand() % 6) + 1;
+        printf("\033[%im [%i] Je modifie la zone %d, ça va me prendre %d secondes ⏱️ \033[0m \n", numProc + 32, numProc+1, i+1, wait);
+        // Modifie la zone partagee
+        printf("\033[%im ... \033[0m \n", numProc + 32);
 
-            // Modifie 
-            printf("\033[%im [%i] J'attends que ce soit mon tour de modifier 😴 \033[0m \n", numProc + 32, numProc+1);
-            if (semop(idSem, &sops[2], 1) == -1) {
-                perror(" probleme de semop ");
-                exit(1);
-            }
+        sleep(wait);
+        tabMem[i] += 1;
+        // Affiche le tableau
+        afficheTableauPartage(nbZone, numProc, tabMem);
 
-            printf("\033[%im [%i] C'est bon, c'est a moi ! \033[0m \n", numProc + 32, numProc+1);
-            if (semop(idSem, &sops[0], 1) == -1) {
-                perror(" probleme de semop ");
-                exit(1);
-            }
-
-            // Récupération de la valeur de la sémaphore actuelle pour affichage
-            int semValue = semctl(idSem, numProc, GETVAL, 0);
-            if (semValue == -1) {
-                perror(" probleme de semctl ");
-                exit(1);
-            }
-                
-            printf("\033[%im [%i] J'ai mis à jour le planning de zones, valeur actuelle de la sémaphore : %i \033[0m \n", numProc + 32, numProc+1, semValue);
-
-            // Traitement d'un temps aléatoire
-            int wait = (rand() % 6) + 5;
-            printf("\033[%im [%i] Je modifie la zone %d, ça va me prendre %d secondes ⏱️ \033[0m \n", numProc + 32, numProc+1, i+1, wait);
-            sleep(wait);
-
-            // Modifie la zone partagee
-            tabMem[i] += wait;
-            
-            printf("\033[%im [%i] Traitement terminé ✅, mise à jour du planning de zones \033[0m \n", numProc + 32, numProc+1);
+        if (numProc != nbSem) {
+            printf("\033[%im [%i] Traitement terminé, maj du planning de zones ✅\033[0m \n", numProc + 32, numProc+1);
 
             if (semop(idSem, &sops[1], 1) == -1) {
                 perror(" probleme de semop ");
                 exit(1);
-            }
-
-            // Récupération de la valeur de la sémaphore actuelle pour affichage
-            semValue = semctl(idSem, numProc, GETVAL, 0);
-            if (semValue == -1) {
-                perror(" probleme de semctl ");
-                exit(1);
-            }
-                
-            printf("\033[%im [%i] J'ai met à jour le planning de zones, valeur actuelle de la sémaphore : %i \033[0m \n", numProc + 32, numProc+1, semValue);
-
-            if (i == nbZone - 1) {
-                printf("\033[%im [%i] J'ai finis de mettre a jour toutes les zones 🏆 \033[0m \n", numProc + 32, numProc+1);
             }
         }
         else {
-            printf("\033[%im [%i] Début de traitement de la zone %d 🖼️ \033[0m \n", numProc + 32, numProc+1, i+1);
-
-            // Modifie 
-            printf("\033[%im [%i] J'attends que ce soit mon tour de modifier 😴 \033[0m \n", numProc + 32, numProc+1);
-            if (semop(idSem, &sops[2], 1) == -1) {
-                perror(" probleme de semop ");
-                exit(1);
-            }
-
-            printf("\033[%im [%i] C'est bon, c'est a moi ! \033[0m \n", numProc + 32, numProc+1);
-
-            // Traitement d'un temps aléatoire
-            int wait = (rand() % 6) + 5;
-            printf("\033[%im [%i] Je modifie la zone %d, ça va me prendre %d secondes ⏱️ \033[0m \n", numProc + 32, numProc+1, i+1, wait);
-            sleep(wait);
-
-            // Modifie la zone partagee
-            tabMem[i] += wait;
-            
             printf("\033[%im [%i] Traitement terminé ✅ \033[0m \n", numProc + 32, numProc+1);
+        }
 
-            if (i == nbZone - 1) {
-                printf("\033[%im [%i] 🎉 J'ai finis de mettre a jour toutes les zones, traitement terminé 🎉\033[0m \n", numProc + 32, numProc+1);
+        // Affiche le tableau actuel
+        afficheTableauSem(idSem, nbSem, numProc);
+
+        if (i == nbZone - 1) {
+            if ( numProc != nbSem ) {
+                printf("\n\033[%im [%i] J'ai finis de maj toutes les zones 🏆\033[0m \n", numProc + 32, numProc+1);
             }
-        }    
-
+            else {
+                printf("\n\033[%im [%i] 🎉 J'ai finis de maj toutes les zones, traitement terminé 🎉\033[0m \n", numProc + 32, numProc+1);
+            }
+        }
     }
 
     exit(0);

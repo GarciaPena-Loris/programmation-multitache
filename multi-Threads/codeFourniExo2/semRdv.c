@@ -11,7 +11,7 @@ typedef union Semaphores {
     int val;
     struct semid_ds *buf;
     ushort *array;
-} Semaphores;
+};
 
 void rdv(int nProc, int idSem, int nbRdv) {
     // Initialisation du random du wait
